@@ -70,10 +70,19 @@ class LoginScreen extends StatelessWidget {
   }
 
   Widget submitButton() {
-    return RaisedButton(
-      child: Text("Login"),
-      color: Colors.blue,
-      onPressed: () {},
+    return StreamBuilder(
+      stream: _bloc.submit,
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        return RaisedButton(
+          child: Text("Login"),
+          color: Colors.blue,
+          onPressed: snapshot.hasError
+              ? null
+              : () {
+                  print("Hi there");
+                },
+        );
+      },
     );
   }
 }

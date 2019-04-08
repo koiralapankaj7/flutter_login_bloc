@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'validation_mixin.dart';
+import 'package:rxdart/rxdart.dart';
 
 // In dart we cannot apply a mixin to a class without first extending it.
 // By be this is fixed in new version of dart as i did not see any error.
@@ -14,10 +15,18 @@ class Bloc extends Object with ValidationMixin {
   // We know that email and password will always be string so that we make controller generic.
   // If we dont have any idea what type of values run through stram controller then we dont make
   // stream controller genrric i.e StreamController controller = new StreamController();
+  // Stream controller by default is single subscription stream so we cannot listen more than once
 
-  final StreamController<String> _emailController = StreamController<String>();
+  // 1. Single subscription stream
+  // final StreamController<String> _emailController = StreamController<String>();
+  // final StreamController<String> _passwordController =
+  //     StreamController<String>();
+
+  // 2. Multi subscription stream
+  final StreamController<String> _emailController =
+      StreamController<String>.broadcast();
   final StreamController<String> _passwordController =
-      StreamController<String>();
+      StreamController<String>.broadcast();
 
   // Add data to stream (Similar to setter function)
   Function(String) get changeEmail => _emailController.sink.add;
@@ -28,6 +37,11 @@ class Bloc extends Object with ValidationMixin {
   Stream<String> get email => _emailController.stream.transform(validateEmail);
   Stream<String> get password =>
       _passwordController.stream.transform(validatePassword);
+  // Using RxDart function
+  // Email and password is stream whereas e and p is value of email and password.
+  // As there is no work of the values right know i declare e and p.
+  Stream<bool> get submit =>
+      Observable.combineLatest2(email, password, (String e, String p) => true);
 
   dispose() {
     _emailController.close();
